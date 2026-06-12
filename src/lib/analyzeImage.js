@@ -19,8 +19,8 @@ const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/gif', 'image/w
 const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
 
 export const CHANGE_TYPES = [
-  'Background swap',
   'Tagline',
+  'Background swap',
   'Product',
   'Character',
   'Composition/layout',
