@@ -127,7 +127,7 @@ export async function analyzeImage(file, brief, signal) {
 
   // Demo mode (default): skip the live Claude call and return a scripted analysis.
   if (DEMO_MODE || import.meta.env.VITE_USE_MOCK_ANALYZE === 'true') {
-    await demoDelay(DEMO_MODE ? 2800 : 2200, signal);
+    await demoDelay(DEMO_MODE ? 2000 : 2200, signal);
     return {
       summary: 'Bold, high-contrast creative with a clear focal subject and strong brand presence. Tagline is short and punchy; composition leaves room for contextual background variation.',
       objects: ['hero subject', 'wordmark', 'background'],

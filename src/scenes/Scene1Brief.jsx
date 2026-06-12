@@ -244,9 +244,10 @@ export default function Scene1Brief({ onNext }) {
   const [autoSignals, setAutoSignals] = useState([]);
   const [autoChanges, setAutoChanges] = useState([]);
 
-  const fileInputRef  = useRef(null);
-  const abortRef      = useRef(null);
-  const leftCardRef   = useRef(null);
+  const fileInputRef    = useRef(null);
+  const abortRef        = useRef(null);
+  const staggerTimers   = useRef([]);
+  const leftCardRef     = useRef(null);
   const showDetailsRef = useRef(false);
   const [leftCardHeight, setLeftCardHeight] = useState(null);
 
@@ -292,6 +293,8 @@ export default function Scene1Brief({ onNext }) {
     }
 
     abortRef.current?.abort();
+    staggerTimers.current.forEach(clearTimeout);
+    staggerTimers.current = [];
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -313,12 +316,22 @@ export default function Scene1Brief({ onNext }) {
         const aiSignals = result.recommendedSignalTypes?.map(s => s.type) ?? [];
         const others = aiSignals.filter(t => t !== CONTEXTUAL).slice(0, 1);
         const signals = [CONTEXTUAL, ...others];
-        const changes = (result.recommendedChangeTypes ?? []).slice(0, 1);
+        const changes = (result.recommendedChangeTypes ?? []).slice(0, 2);
         setAnalysis(result);
-        setSelectedSignals(signals);
-        setSelectedChanges(changes);
         setAutoSignals(signals);
         setAutoChanges(changes);
+        // Reveal chips one at a time — 220ms apart
+        const chips = [
+          ...signals.map(v => ({ kind: 'signal', v })),
+          ...changes.map(v => ({ kind: 'change', v })),
+        ];
+        chips.forEach((chip, i) => {
+          const t = setTimeout(() => {
+            if (chip.kind === 'signal') setSelectedSignals(prev => [...prev, chip.v]);
+            else setSelectedChanges(prev => [...prev, chip.v]);
+          }, i * 220);
+          staggerTimers.current.push(t);
+        });
       }
     } catch (err) {
       if (controller.signal.aborted) return;
