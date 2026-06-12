@@ -655,12 +655,17 @@ export default function Scene1Brief({ onNext }) {
         {!previewUrl && !analyzing ? (
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="rounded-xl border-2 border-dashed border-gray-200 hover:border-brand/40 hover:bg-info-bg/20 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 py-14"
+            className="group rounded-xl border border-dashed border-gray-300 hover:border-brand/50 hover:bg-info-bg/10 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-4 py-14"
           >
-            <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center text-3xl">🖼</div>
-            <div className="text-center">
-              <p className="text-sm font-semibold text-dark">Upload seed creative</p>
-              <p className="text-xs text-low-em mt-0.5">JPEG, PNG, GIF or WebP · click to browse</p>
+            <div className="w-10 h-10 text-gray-300 group-hover:text-brand/50 transition-colors">
+              <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="38" height="38" rx="8" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 3"/>
+                <path d="M20 26V14M20 14l-5 5M20 14l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-semibold text-dark">Drop your seed creative here</p>
+              <p className="text-xs text-low-em">or <span className="text-brand-text font-medium group-hover:underline">browse files</span> &nbsp;·&nbsp; JPEG · PNG · WebP</p>
             </div>
           </div>
         ) : (
