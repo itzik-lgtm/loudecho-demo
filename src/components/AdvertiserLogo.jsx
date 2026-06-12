@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 
 export default function AdvertiserLogo({ adv, size = 8 }) {
   // Try sources in order: logoUrl (Firebase Storage) → clearbit (domain) → letter avatar
-  const [stage, setStage] = useState(0); // 0=logoUrl, 1=clearbit, 2=avatar
   const src0 = adv.logoUrl || null;
   const src1 = adv.domain ? `https://logo.clearbit.com/${adv.domain}` : null;
+  const initStage = src0 ? 0 : src1 ? 1 : 2;
+  const [stage, setStage] = useState(initStage); // 0=logoUrl, 1=clearbit, 2=avatar
   const src = stage === 0 ? src0 : stage === 1 ? src1 : null;
   const advance = () => setStage(s => s + 1);
   // Reset when advertiser changes
-  useEffect(() => setStage(0), [adv.id]);
+  useEffect(() => setStage(src0 ? 0 : src1 ? 1 : 2), [adv.id]);
 
   const sz = `w-${size} h-${size}`;
   if (src) {
