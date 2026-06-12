@@ -24,7 +24,6 @@ export default function Scene4GoLive({ onNext, onLaunched, campaignConfig }) {
     [pool]
   );
 
-  // Top topics actually covered by the launch pool
   const topicStats = useMemo(() => {
     const counts = {};
     for (const v of pool) {
@@ -39,7 +38,7 @@ export default function Scene4GoLive({ onNext, onLaunched, campaignConfig }) {
     if (phase !== 'launching') return;
     const t = setTimeout(() => {
       setPhase('live');
-      onLaunched?.();   // unlocks the Results step in the stepper
+      onLaunched?.();
     }, 1500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -54,60 +53,48 @@ export default function Scene4GoLive({ onNext, onLaunched, campaignConfig }) {
         cta={isLive ? { label: 'Jump to Day 7 →', onClick: () => onNext(campaignConfig) } : undefined}
       />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-8 py-10 space-y-8">
+      <div className="flex-1 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-8 py-6 space-y-5 h-full flex flex-col">
 
-          {/* Advertiser hero */}
-          {advertiser && (
-            <div className="glass-card rounded-2xl p-6 flex items-start gap-5">
-              {isRamp ? (
-                <img src="/ramp/ramp-logo.png" alt="Ramp" className="w-14 h-14 rounded-xl shrink-0 object-contain" />
-              ) : (
-                <AdvertiserLogo adv={advertiser} size={14} />
-              )}
-              <div className="flex-1 min-w-0 space-y-2">
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <h2 className="text-xl font-black text-dark">{advertiser.name}</h2>
-                  {advertiser.category && (
-                    <span className="text-[10px] font-semibold bg-gray-100 text-med-em px-2.5 py-1 rounded-full">{advertiser.category}</span>
-                  )}
-                  {advertiser.industry && (
-                    <span className="text-[10px] font-semibold bg-gray-100 text-med-em px-2.5 py-1 rounded-full">{advertiser.industry}</span>
-                  )}
-                </div>
-                {advertiser.brief && (
-                  <p className="text-xs text-med-em leading-relaxed line-clamp-2">{advertiser.brief}</p>
+          {/* Advertiser strip + variant count — one row */}
+          <div className="glass-card rounded-xl px-5 py-4 flex items-center gap-5">
+            {advertiser && (
+              <>
+                {isRamp ? (
+                  <img src="/ramp/ramp-logo.png" alt="Ramp" className="w-10 h-10 rounded-xl shrink-0 object-contain" />
+                ) : (
+                  <AdvertiserLogo adv={advertiser} size={10} />
                 )}
-                {advertiser.keyMessages?.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-0.5">
-                    {advertiser.keyMessages.map(msg => (
-                      <span key={msg} className="text-[10px] font-semibold bg-info-bg text-brand-text px-2.5 py-1 rounded-full">"{msg}"</span>
-                    ))}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-dark text-base leading-tight">{advertiser.name}</span>
+                    {advertiser.category && (
+                      <span className="text-[10px] font-semibold bg-gray-100 text-med-em px-2 py-0.5 rounded-full">{advertiser.category}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="w-px h-8 bg-line-soft shrink-0 mx-1" />
+              </>
+            )}
+            <div className={`flex items-center gap-3 transition-all duration-700 ${isLive ? 'opacity-100' : 'opacity-60'}`}>
+              <span className="text-4xl font-black text-dark tabular-nums leading-none">{variantCount}</span>
+              <div>
+                <p className="text-[10px] font-bold text-low-em uppercase tracking-widest leading-none mb-1">
+                  {isLive ? 'Variants deployed' : 'Variants ready'}
+                </p>
+                {isLive && (
+                  <div className="flex items-center gap-1.5 fade-in">
+                    <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                    <span className="text-xs font-semibold text-success">Live</span>
                   </div>
                 )}
               </div>
             </div>
-          )}
-
-          {/* Hero count */}
-          <div className={`transition-all duration-700 ${isLive ? 'opacity-100' : 'opacity-60'}`}>
-            <p className="text-[11px] font-bold text-low-em uppercase tracking-widest mb-1">
-              {isLive ? 'Variants deployed' : 'Variants ready'}
-            </p>
-            <div className="flex items-end gap-3">
-              <span className="text-7xl font-black text-dark tabular-nums leading-none">{variantCount}</span>
-              {isLive && (
-                <div className="flex items-center gap-2 mb-2 fade-in">
-                  <span className="w-2.5 h-2.5 rounded-full bg-success animate-pulse" />
-                  <span className="text-sm font-semibold text-success">Live</span>
-                </div>
-              )}
-            </div>
           </div>
 
-          {/* Stats grid — one shared pattern: title → subtitle → pill cloud */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="glass-card rounded-xl p-5 space-y-3">
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
+            <div className="glass-card rounded-xl p-4 space-y-2">
               <p className="text-[10px] font-bold text-low-em uppercase tracking-wider">Formats</p>
               <p className="text-sm font-semibold text-dark">{formatCounts.length} IAB formats</p>
               <div className="flex flex-wrap gap-1.5">
@@ -119,7 +106,7 @@ export default function Scene4GoLive({ onNext, onLaunched, campaignConfig }) {
               </div>
             </div>
 
-            <div className="glass-card rounded-xl p-5 space-y-3">
+            <div className="glass-card rounded-xl p-4 space-y-2">
               <p className="text-[10px] font-bold text-low-em uppercase tracking-wider">Topics</p>
               <p className="text-sm font-semibold text-dark">{topic} · {topicStats.total} covered</p>
               <div className="flex flex-wrap gap-1.5">
@@ -134,7 +121,7 @@ export default function Scene4GoLive({ onNext, onLaunched, campaignConfig }) {
               </div>
             </div>
 
-            <div className="glass-card rounded-xl p-5 space-y-3">
+            <div className="glass-card rounded-xl p-4 space-y-2">
               <p className="text-[10px] font-bold text-low-em uppercase tracking-wider">Signal Types</p>
               <p className="text-sm font-semibold text-dark">{signalTypes.length || '—'} selected</p>
               {signalTypes.length > 0 && (
@@ -146,7 +133,7 @@ export default function Scene4GoLive({ onNext, onLaunched, campaignConfig }) {
               )}
             </div>
 
-            <div className="glass-card rounded-xl p-5 space-y-3">
+            <div className="glass-card rounded-xl p-4 space-y-2">
               <p className="text-[10px] font-bold text-low-em uppercase tracking-wider">Change Types</p>
               <p className="text-sm font-semibold text-dark">{changeTypes.length || '—'} applied</p>
               {changeTypes.length > 0 && (
@@ -159,29 +146,28 @@ export default function Scene4GoLive({ onNext, onLaunched, campaignConfig }) {
             </div>
           </div>
 
-{/* CTA / success */}
+          {/* CTA / success */}
           {!isLive ? (
-            <div className="flex flex-col items-center gap-3 pt-2">
+            <div className="flex flex-col items-center gap-2 py-1">
               <button
                 onClick={() => setPhase('launching')}
                 disabled={phase === 'launching'}
-                className={`bg-dark text-white font-bold px-14 py-4 rounded-lg text-base transition-all ${
+                className={`bg-dark text-white font-bold px-14 py-3.5 rounded-lg text-base transition-all ${
                   phase === 'launching' ? 'animate-pulse opacity-70 cursor-not-allowed' : 'hover:opacity-90'
                 }`}
               >
                 {phase === 'launching' ? 'Publishing…' : 'Launch campaign'}
               </button>
-              {phase === 'ready' && (
-                <p className="text-xs text-low-em">{variantCount} variants across {formatCounts.length} formats</p>
-              )}
             </div>
           ) : (
-            <div className="fade-in flex flex-col items-center gap-4 pt-2">
-              <div className="w-14 h-14 rounded-full bg-success text-white flex items-center justify-center text-2xl font-bold shadow-lg">✓</div>
-              <p className="text-2xl font-bold text-dark">Campaign live.</p>
+            <div className="fade-in flex items-center justify-center gap-6 py-1">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-success text-white flex items-center justify-center text-lg font-bold shadow-lg shrink-0">✓</div>
+                <p className="text-xl font-bold text-dark">Campaign live.</p>
+              </div>
               <button
                 onClick={() => onNext(campaignConfig)}
-                className="bg-dark text-white font-bold px-8 py-3 rounded-lg text-sm hover:opacity-90 transition-opacity"
+                className="bg-dark text-white font-bold px-6 py-2.5 rounded-lg text-sm hover:opacity-90 transition-opacity"
               >
                 Jump to Day 7 →
               </button>
