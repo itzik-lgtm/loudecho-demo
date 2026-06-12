@@ -148,7 +148,7 @@ export async function analyzeImage(file, brief, signal) {
         { type: 'Contextual', reason: 'Adapts creative to the surrounding page content — always relevant for display advertising.' },
         { type: 'Audience',   reason: 'Different cohorts respond to different value props; messaging can flex by segment.' },
       ],
-      recommendedChangeTypes: ['Background swap', 'Tagline'],
+      recommendedChangeTypes: ['Tagline', 'Background swap'],
     };
   }
 
