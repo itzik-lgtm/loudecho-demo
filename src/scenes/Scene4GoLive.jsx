@@ -58,19 +58,31 @@ export default function Scene4GoLive({ onNext, onLaunched, campaignConfig }) {
 
           {/* Advertiser hero */}
           {advertiser && (
-            <div className="glass-card rounded-xl p-4 flex items-center gap-4">
+            <div className="glass-card rounded-xl p-4 flex items-start gap-4">
               {isRamp ? (
                 <img src="/ramp/ramp-logo.png" alt="Ramp" className="w-11 h-11 rounded-xl shrink-0 object-contain" />
               ) : (
                 <AdvertiserLogo adv={advertiser} size={11} />
               )}
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base font-black text-dark">{advertiser.name}</h2>
-                {advertiser.category && (
-                  <span className="text-[10px] font-semibold bg-gray-100 text-med-em px-2 py-0.5 rounded-full">{advertiser.category}</span>
+              <div className="flex-1 min-w-0 space-y-1.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base font-black text-dark">{advertiser.name}</h2>
+                  {advertiser.category && (
+                    <span className="text-[10px] font-semibold bg-gray-100 text-med-em px-2 py-0.5 rounded-full">{advertiser.category}</span>
+                  )}
+                  {advertiser.industry && (
+                    <span className="text-[10px] font-semibold bg-gray-100 text-med-em px-2 py-0.5 rounded-full">{advertiser.industry}</span>
+                  )}
+                </div>
+                {advertiser.brief && (
+                  <p className="text-xs text-med-em leading-relaxed">{advertiser.brief}</p>
                 )}
-                {advertiser.industry && (
-                  <span className="text-[10px] font-semibold bg-gray-100 text-med-em px-2 py-0.5 rounded-full">{advertiser.industry}</span>
+                {advertiser.keyMessages?.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-0.5">
+                    {advertiser.keyMessages.map(msg => (
+                      <span key={msg} className="text-[10px] font-semibold bg-info-bg text-brand-text px-2.5 py-1 rounded-full">"{msg}"</span>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
