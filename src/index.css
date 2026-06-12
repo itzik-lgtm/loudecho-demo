@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #ffffff;
+    color: #110c22;
+    -webkit-font-smoothing: antialiased;
+  }
+  #root { min-height: 100vh; }
+}
+
+@layer utilities {
+  /* Flat card — white with border (for standalone cards) */
+  .glass-card {
+    background: #ffffff;
+    border: 1px solid #e2e4eb;
+    box-shadow: 0 1px 3px rgba(17,12,34,0.04);
+  }
+  /* Solid surface — white with shadow, no border (for headers/panels; add explicit border-* as needed) */
+  .glass-card-solid {
+    background: #ffffff;
+    box-shadow: 0 1px 0 #e2e4eb;
+  }
+  .dark-pill {
+    background: #110c22;
+  }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fadeInUp 0.35s ease both; }
+.streaming-grid .card-pop { animation: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in { animation: fadeIn 0.4s ease both; }
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+.pulse-soft { animation: pulse-soft 1.4s ease-in-out infinite; }
+
+@keyframes slideInBottom {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.slide-in-bottom { animation: slideInBottom 0.25s ease both; }
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+.slide-in-right { animation: slideInRight 0.25s ease both; }
+
+@keyframes rowFadeIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.row-fade-in { animation: rowFadeIn 0.2s ease both; }
+
+@keyframes cardPop {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.card-pop { animation: cardPop 0.25s ease both; }
+
+@keyframes countPop {
+  0%   { transform: scale(1.4); opacity: 0.6; }
+  60%  { transform: scale(0.95); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+.count-pop { animation: countPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200%  0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
