@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 export default function AdvertiserLogo({ adv, size = 8 }) {
   // Try sources in order: logoUrl (Firebase Storage) → clearbit (domain) → letter avatar
   const src0 = adv.logoUrl || null;
-  const src1 = adv.domain ? `https://logo.clearbit.com/${adv.domain}` : null;
+  const src1 = adv.domain ? `https://www.google.com/s2/favicons?domain=${adv.domain}&sz=128` : null;
   const initStage = src0 ? 0 : src1 ? 1 : 2;
   const [stage, setStage] = useState(initStage); // 0=logoUrl, 1=clearbit, 2=avatar
   const src = stage === 0 ? src0 : stage === 1 ? src1 : null;
