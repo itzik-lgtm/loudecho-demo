@@ -3,9 +3,6 @@ import { analyzeImage, validateFile, CHANGE_TYPES, SIGNAL_TYPES } from '../lib/a
 import { ADVERTISERS } from '../data/advertisers';
 import AdvertiserLogo from '../components/AdvertiserLogo';
 
-// The seed analysis "runs" once per session — revisiting the scene skips the beat.
-let hasPrerunAnalysis = false;
-
 const SIGNAL_TYPE_ICONS = {
   'Contextual':      '📄',
   'Audience':        '👥',
@@ -32,34 +29,6 @@ const CONTEXTUAL = 'Contextual';
 
 const TOPIC_OPTIONS = ['All Topics', 'Trending Topics', 'Brand Specific', 'Custom Topics'];
 
-const DEFAULT_IMAGE = '/ramp/ramp-seed-blob.png';
-const DEFAULT_META  = { name: 's-blob-v1-IMAGE-QP8ehblLM6M.png', size: '575 KB' };
-
-const DEFAULT_ANALYSIS = {
-  summary: 'Bold abstract blob-style creative with a vibrant lime-green accent against a near-black background. Features the Ramp wordmark and a short punchy tagline. Strong visual contrast with a modern, challenger-brand aesthetic.',
-  objects: ['abstract shape', 'wordmark', 'gradient background'],
-  text: ['Slay the receipt monster', 'Get started'],
-  backgroundType: 'gradient',
-  mood: 'bold, energetic',
-  dominantColors: ['#0a0a0a', '#C8FF00', '#ffffff'],
-  compositionQuality: 'High contrast with centered focal point; wordmark clearly visible. Strong brand recall.',
-  logoPresent: true,
-  logoSize: 'medium',
-  logoPlacement: 'center',
-  characters: null,
-  copySentiment: 'bold',
-  copyLength: 'short',
-  copyReadingLevel: 'accessible',
-  weakSpots: ['No human character — limits emotional connection for lifestyle and aspiration segments'],
-  recommendedSignalTypes: [
-    { type: 'Contextual', reason: 'Adapts creative to the surrounding page content — always relevant for display advertising.' },
-    { type: 'Audience',   reason: 'Finance decision-makers and startup founders respond differently to challenger messaging.' },
-  ],
-  recommendedChangeTypes: ['Background swap', 'Tagline'],
-};
-
-const DEFAULT_AUTO_SIGNALS = ['Contextual', 'Audience'];
-const DEFAULT_AUTO_CHANGES = ['Background swap', 'Tagline'];
 
 function fmt(bytes) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -189,16 +158,6 @@ export default function Scene1Brief({ onNext }) {
   const [formatsOpen, setFormatsOpen]         = useState(false);
   const formatsRef = useRef(null);
 
-  // Pre-run analysis beat: the system visibly "reads" the seed ad on first visit
-  const [preAnalyzing, setPreAnalyzing] = useState(!hasPrerunAnalysis);
-  useEffect(() => {
-    if (!preAnalyzing) return;
-    const t = setTimeout(() => {
-      hasPrerunAnalysis = true;
-      setPreAnalyzing(false);
-    }, 900);
-    return () => clearTimeout(t);
-  }, [preAnalyzing]);
 
   // Fetch live advertisers from Postgres via Vite middleware (supplies logo
   // URLs; falls back silently to the hardcoded list if unavailable)
@@ -273,17 +232,17 @@ export default function Scene1Brief({ onNext }) {
   const [previewUrl, setPreviewUrl]   = useState(null);
   const [fileMeta, setFileMeta]       = useState(null);
   const [analyzing, setAnalyzing]     = useState(false);
-  const [analysisResult, setAnalysis] = useState(DEFAULT_ANALYSIS);
+  const [analysisResult, setAnalysis] = useState(null);
   const [analysisError, setError]     = useState(null);
 
   // Selection state
-  const [selectedSignalTypes, setSelectedSignals] = useState(DEFAULT_AUTO_SIGNALS);
-  const [selectedChangeTypes, setSelectedChanges] = useState(DEFAULT_AUTO_CHANGES);
+  const [selectedSignalTypes, setSelectedSignals] = useState([]);
+  const [selectedChangeTypes, setSelectedChanges] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState('All Topics');
   const [customTopic, setCustomTopic] = useState('');
   // Tracks which values were auto-selected by the system (used to show ✦ marker)
-  const [autoSignals, setAutoSignals] = useState(DEFAULT_AUTO_SIGNALS);
-  const [autoChanges, setAutoChanges] = useState(DEFAULT_AUTO_CHANGES);
+  const [autoSignals, setAutoSignals] = useState([]);
+  const [autoChanges, setAutoChanges] = useState([]);
 
   const fileInputRef  = useRef(null);
   const abortRef      = useRef(null);
@@ -375,13 +334,10 @@ export default function Scene1Brief({ onNext }) {
     (analysisResult?.recommendedSignalTypes ?? []).map(s => [s.type, s.reason])
   );
 
-  const currentImage = previewUrl ?? DEFAULT_IMAGE;
-  const currentMeta  = fileMeta ?? DEFAULT_META;
-
   const [showAnalysisDetails, setShowAnalysisDetails] = useState(false);
   useEffect(() => { showDetailsRef.current = showAnalysisDetails; }, [showAnalysisDetails]);
 
-  const canProceed = selectedSignalTypes.length >= 1 && selectedChangeTypes.length >= 1 &&
+  const canProceed = !!analysisResult && selectedSignalTypes.length >= 1 && selectedChangeTypes.length >= 1 &&
     (selectedTopic !== 'Custom Topics' || customTopic.trim().length > 0);
 
   return (
@@ -684,37 +640,56 @@ export default function Scene1Brief({ onNext }) {
             onChange={handleUpload}
             className="hidden"
           />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={analyzing}
-            className="text-xs font-semibold text-dark border border-gray-300 px-3 py-1 rounded-full hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {previewUrl ? 'Replace' : 'Upload Image'}
-          </button>
-        </div>
-
-        {/* Image preview with loading overlay */}
-        <div className="relative rounded-xl overflow-hidden flex justify-center bg-gray-50">
-          <img
-            src={currentImage}
-            alt="Seed creative"
-            className="object-contain"
-            style={{ maxHeight: 260, maxWidth: '100%' }}
-          />
-          {(analyzing || preAnalyzing) && (
-            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 fade-in">
-              <div className="w-6 h-6 rounded-full border-2 border-brand border-t-transparent animate-spin" />
-              <p className="text-sm font-semibold text-dark">{preAnalyzing ? 'Reading seed creative…' : 'Analyzing image...'}</p>
-            </div>
+          {previewUrl && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={analyzing}
+              className="text-xs font-semibold text-dark border border-gray-300 px-3 py-1 rounded-full hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Replace
+            </button>
           )}
         </div>
 
+        {/* Image area: empty state or preview */}
+        {!previewUrl && !analyzing ? (
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-xl border-2 border-dashed border-gray-200 hover:border-brand/40 hover:bg-info-bg/20 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 py-14"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center text-3xl">🖼</div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-dark">Upload seed creative</p>
+              <p className="text-xs text-low-em mt-0.5">JPEG, PNG, GIF or WebP · click to browse</p>
+            </div>
+          </div>
+        ) : (
+          <div className="relative rounded-xl overflow-hidden flex justify-center bg-gray-50">
+            {previewUrl && (
+              <img
+                src={previewUrl}
+                alt="Seed creative"
+                className="object-contain"
+                style={{ maxHeight: 260, maxWidth: '100%' }}
+              />
+            )}
+            {analyzing && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 fade-in">
+                <div className="w-6 h-6 rounded-full border-2 border-brand border-t-transparent animate-spin" />
+                <p className="text-sm font-semibold text-dark">Analyzing image…</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* File metadata */}
-        <div className="flex items-center gap-2 text-xs text-gray-400">
-          <span className="font-mono truncate max-w-[260px]">{currentMeta.name}</span>
-          <span>·</span>
-          <span>{currentMeta.size}</span>
-        </div>
+        {fileMeta && (
+          <div className="flex items-center gap-2 text-xs text-gray-400">
+            <span className="font-mono truncate max-w-[260px]">{fileMeta.name}</span>
+            <span>·</span>
+            <span>{fileMeta.size}</span>
+          </div>
+        )}
 
         {/* Error */}
         {analysisError && !analyzing && (
@@ -725,7 +700,7 @@ export default function Scene1Brief({ onNext }) {
         )}
 
         {/* AI summary — visible without expanding the full analysis */}
-        {analysisResult && !analyzing && !preAnalyzing && (
+        {analysisResult && !analyzing && (
           <div className="fade-in rounded-lg bg-info-bg/60 border border-brand/15 px-3 py-2.5">
             <p className="text-xs text-dark leading-relaxed">
               <span className="font-bold text-brand-text">Seed analysis: </span>{analysisResult.summary}
@@ -734,7 +709,7 @@ export default function Scene1Brief({ onNext }) {
         )}
 
         {/* Analysis results */}
-        {analysisResult && !analyzing && !preAnalyzing && (
+        {analysisResult && !analyzing && (
           <div className="space-y-5 border-t border-gray-200 pt-4 fade-in">
 
             <button
@@ -890,7 +865,7 @@ export default function Scene1Brief({ onNext }) {
 
       {/* Selections */}
       <div
-        className={`glass-card rounded-xl p-6 flex flex-col justify-between transition-opacity duration-500 ${analysisResult && !analyzing && !preAnalyzing ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}
+        className={`glass-card rounded-xl p-6 flex flex-col justify-between transition-opacity duration-500 ${analysisResult && !analyzing ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}
         style={leftCardHeight ? { minHeight: leftCardHeight } : undefined}
       >
 
